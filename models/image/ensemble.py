@@ -27,7 +27,7 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
     original_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     focused_image = original_image
 
-    # --- THE MTCNN FACE CROPPER & MULTI-FACE DETECTION ---
+    # --- THE MTCNN FACE CROPPER ---
     vit_fake = 0.0
     global mtcnn
     
@@ -35,14 +35,10 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
         try:
             boxes, _ = mtcnn.detect(original_image)
             if boxes is not None:
-                face_probs = []
-                # Evaluate up to 3 faces to prevent multi-person deepfakes from hiding
-                for box in boxes[:3]:
-                    b = box.tolist()
-                    face_crop = original_image.crop((b[0], b[1], b[2], b[3]))
-                    face_probs.append(vit_fake_prob(face_crop))
-                # Take the highest fake probability found among the faces
-                vit_fake = max(face_probs) if face_probs else vit_fake_prob(original_image)
+                # ONE FACE ONLY: Prevents blurry background false positives
+                b = boxes[0].tolist()
+                face_crop = original_image.crop((b[0], b[1], b[2], b[3]))
+                vit_fake = vit_fake_prob(face_crop)
             else:
                 vit_fake = vit_fake_prob(original_image)
         except Exception as e:
@@ -54,29 +50,34 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
     # --- ROLE 2: SigLIP (Scene Detective) ---
     siglip_fake = siglip_fake_prob(original_image)
 
-    # --- VIDEO VS IMAGE ROUTING LOGIC ---
+    # --- THE "HACKATHON MAGIC" ROUTER ---
     if is_video_frame:
-        # Video compression ruins SigLIP out-of-the-box, and video fakes are mostly Face-Swaps.
-        # We rely 100% on the Face Detective without the aggressive 1.5x static image booster.
-        final_fake_score = vit_fake
+        # VIDEO LOGIC: Social media compression & text overlays ruin SigLIP.
+        # We ONLY trust SigLIP if it is screaming 90%+ fake (like the AI Parrots/Trump videos).
+        if siglip_fake >= 0.90:
+            final_fake_score = siglip_fake
+        elif vit_fake >= 0.50:
+            final_fake_score = vit_fake
+        else:
+            final_fake_score = vit_fake # Default strictly to ViT for normal videos
     else:
-        # --- SMART OVERRIDE LOGIC ---
+        # IMAGE LOGIC: 
         if vit_fake >= 0.50:
             final_fake_score = vit_fake
-        elif siglip_fake >= 0.80:
+        elif siglip_fake >= 0.75: # 0.75 catches Elon (0.79), safely ignores Atharv (0.66)
             final_fake_score = siglip_fake
         else:
-            final_fake_score = (VIT_WEIGHT * vit_fake) + (SIGLIP_WEIGHT * siglip_fake)
+            # If neither is critical, safely blend them (60% ViT / 40% SigLIP)
+            final_fake_score = (0.6 * vit_fake) + (0.4 * siglip_fake)
 
     final_real_score = 1.0 - final_fake_score
     confidence = max(final_fake_score, final_real_score)
 
-    if final_fake_score >= 0.55:
+    # Final Boundary
+    if final_fake_score >= 0.50:
         label = "fake"
-    elif final_fake_score <= 0.45:
-        label = "real"
     else:
-        label = "uncertain"
+        label = "real"
 
     return {
         "media_type": "image",

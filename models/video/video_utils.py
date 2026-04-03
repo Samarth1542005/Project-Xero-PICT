@@ -1,6 +1,6 @@
 import numpy as np
 
-FAKE_THRESHOLD = 0.60
+FAKE_THRESHOLD = 0.40
 
 
 def aggregate_frame_results(frame_results: list, fps: float, duration_s: float) -> dict:
