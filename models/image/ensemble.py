@@ -1,8 +1,8 @@
 from PIL import Image
 import io
 import torch
-import cv2
 import numpy as np
+from facenet_pytorch import MTCNN
 
 from models.image.vit_detector import get_fake_prob as vit_fake_prob, load_vit
 from models.image.siglip_detector import get_fake_prob as siglip_fake_prob, load_siglip
@@ -16,68 +16,84 @@ DEVICE = (
     else "cpu"
 )
 
-face_cascade = None
+# MTCNN: keep_all=False → only the highest-confidence face
+# margin=20 captures boundary artifacts (jawline, hairline) that fakes often expose
+# post_process=False → returns raw pixel tensor, not normalized — we convert back to PIL
+mtcnn = None
+
 
 def load_models():
-    global face_cascade
-    print("[ensemble] Loading OpenCV Face Detector...")
-    face_cascade = cv2.CascadeClassifier(
-        cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+    global mtcnn
+    print("[ensemble] Loading MTCNN face detector...")
+    mtcnn = MTCNN(
+        image_size=224,
+        margin=20,
+        keep_all=False,
+        post_process=False,
+        device=DEVICE,
     )
+    print("[ensemble] MTCNN loaded.")
     load_vit()
     load_siglip()
 
-def detect_face(pil_image):
-    """Detect and crop face using OpenCV"""
-    global face_cascade
-    if face_cascade is None:
+
+def detect_face(pil_image: Image.Image) -> Image.Image:
+    """
+    Detect and crop the primary face using MTCNN.
+    Returns the cropped face as a PIL Image, or the original image if no face found.
+    """
+    global mtcnn
+    if mtcnn is None:
         return pil_image
+
     try:
-        # Convert PIL → OpenCV format
-        image_np = np.array(pil_image)
-        gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
-        
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-        if len(faces) > 0:
-            x, y, w, h = faces[0]
-            face = image_np[y:y+h, x:x+w]
-            return Image.fromarray(face)
-            
+        face_tensor = mtcnn(pil_image)  # shape: (3, 224, 224) or None
+
+        if face_tensor is not None:
+            # Convert tensor (0-255 float) back to uint8 PIL Image
+            face_np = face_tensor.permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+            return Image.fromarray(face_np)
+
     except Exception as e:
-        print(f"[ensemble] Face detection failed: {e}")
-        
-    return pil_image  # fallback
+        print(f"[ensemble] MTCNN face detection failed: {e}")
+
+    # Fallback: use full image if no face detected
+    print("[ensemble] No face detected — using full image as fallback.")
+    return pil_image
+
 
 def classify_image(image_bytes: bytes) -> dict:
     original_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    
-    # --- FACE DETECTION (OpenCV instead of MTCNN) ---
+
+    # --- FACE DETECTION (MTCNN) ---
+    # ViT gets the aligned face crop — it specialises in facial forensics
+    # SigLIP gets the full original image — it catches scene-level artifacts
     focused_image = detect_face(original_image)
-    
+
     # --- ROLE 1: ViT (Face Detective) ---
     vit_fake = vit_fake_prob(focused_image)
-    
+
     # --- ROLE 2: SigLIP (Scene Detective) ---
     siglip_fake = siglip_fake_prob(original_image)
-    
+
     # --- SMART OVERRIDE LOGIC WITH BOOSTING ---
-    if vit_fake >= 0.65:                          # was 0.50 — too low
-        final_fake_score = min(0.98, vit_fake * 1.3)  # was 1.5 — too aggressive
+    if vit_fake >= 0.65:
+        final_fake_score = min(0.98, vit_fake * 1.3)
     elif siglip_fake >= 0.80:
         final_fake_score = siglip_fake
     else:
         final_fake_score = (VIT_WEIGHT * vit_fake) + (SIGLIP_WEIGHT * siglip_fake)
-        
+
     final_real_score = 1.0 - final_fake_score
     confidence = max(final_fake_score, final_real_score)
-    
-    if final_fake_score >= 0.65:    # was 0.55
+
+    if final_fake_score >= 0.65:
         label = "fake"
     elif final_fake_score <= 0.40:
         label = "real"
     else:
         label = "uncertain"
-        
+
     return {
         "media_type": "image",
         "label":      label,
