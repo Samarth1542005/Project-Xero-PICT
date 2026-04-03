@@ -1,5 +1,5 @@
 // api.js — Frontend API service to communicate with the Deepfake Detection backend
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "";
 
 /**
  * Detect deepfakes in a media file (image, audio, or video)
@@ -56,11 +56,11 @@ function adaptBackendResponse(data) {
 
   if (frontalLabel !== 'real') {
     // Basic issues for UI
-    if (technical.vit_fake_prob > 0.6) {
+    if (technical.ensemble_breakdown?.vit_fake_prob > 0.6) {
       issues.push({ id: 'face', label: 'Facial feature manipulation', severity: 'high' });
       regions.push({ id: 'r1', label: 'Face Gradients', x: 25, y: 30, w: 50, h: 40, color: '#ef4444', issueId: 'face' });
     }
-    if (technical.siglip_fake_prob > 0.6) {
+    if (technical.ensemble_breakdown?.siglip_fake_prob > 0.6) {
       issues.push({ id: 'bg', label: 'Background synthetic artifacts', severity: 'medium' });
     }
   }
