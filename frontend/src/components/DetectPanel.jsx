@@ -310,12 +310,27 @@ export default function DetectPanel() {
                   justifyContent: 'center',
                   border: '1px solid var(--color-border)'
                 }}>
-                  {/* Container that shrinks to the image size */}
+                  {/* Container that shrinks to the image/video size */}
                   <div style={{ position: 'relative', maxWidth: '100%', maxHeight: '400px', display: 'inline-block' }}>
                     {current.file.previewUrl && isImage(current.file) ? (
                       <img 
                         src={current.file.previewUrl} 
                         alt="Forensic Preview" 
+                        style={{ 
+                          width: 'auto', 
+                          maxWidth: '100%', 
+                          height: 'auto', 
+                          maxHeight: '400px', 
+                          objectFit: 'contain', 
+                          display: 'block', 
+                          filter: isAnalyzing ? 'brightness(0.5) contrast(1.2)' : 'none', 
+                          transition: 'all 0.4s var(--transition)' 
+                        }} 
+                      />
+                    ) : current.file.previewUrl && current.file.type.startsWith('video/') ? (
+                      <video 
+                        src={current.file.previewUrl} 
+                        autoPlay loop muted playsInline
                         style={{ 
                           width: 'auto', 
                           maxWidth: '100%', 

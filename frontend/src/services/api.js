@@ -55,13 +55,21 @@ function adaptBackendResponse(data) {
   const regions = [];
 
   if (frontalLabel !== 'real') {
-    // Basic issues for UI
-    if (technical.ensemble_breakdown?.vit_fake_prob > 0.6) {
+    // Image issues
+    if (technical?.ensemble_breakdown?.vit_fake_prob > 0.6) {
       issues.push({ id: 'face', label: 'Facial feature manipulation', severity: 'high' });
       regions.push({ id: 'r1', label: 'Face Gradients', x: 25, y: 30, w: 50, h: 40, color: '#ef4444', issueId: 'face' });
     }
-    if (technical.ensemble_breakdown?.siglip_fake_prob > 0.6) {
+    if (technical?.ensemble_breakdown?.siglip_fake_prob > 0.6) {
       issues.push({ id: 'bg', label: 'Background synthetic artifacts', severity: 'medium' });
+    }
+    
+    // Video issues
+    if (technical?.frame_summary?.fake_ratio > 0.3) {
+      issues.push({ id: 'vf1', label: 'High proportion of synthetic frames', severity: 'high' });
+    }
+    if (technical?.frame_summary?.avg_fake_score > 0.6) {
+      issues.push({ id: 'vf2', label: 'Temporal blending anomalies detected', severity: 'medium' });
     }
   }
 

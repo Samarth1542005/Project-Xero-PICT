@@ -62,9 +62,17 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
 
    # --- REDESIGNED MASTER ROUTER ---
     if is_video_frame:
-        final_fake_score = vit_fake
+        # For videos, modern AI generators (Sora/Gen-2) fake the structure of the entire scene.
+        # ViT Face Detectors frequently fail on distant or fast-moving generated faces.
+        # So we aggressively rely on the SigLIP Scene Detective!
+        if siglip_fake >= 0.55:
+            final_fake_score = siglip_fake
+        elif vit_fake >= 0.65:
+            final_fake_score = vit_fake
+        else:
+            final_fake_score = (0.3 * vit_fake) + (0.7 * siglip_fake) # Flip weight to favor Scene
     else:
-        # Tightened override boundaries: require stronger signals before overriding the 70/30 balance.
+        # Tightened override boundaries for Images (which are usually Face Swaps)
         if vit_fake >= 0.65: 
             final_fake_score = vit_fake
         elif siglip_fake >= 0.85: 
