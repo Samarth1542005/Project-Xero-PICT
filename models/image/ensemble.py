@@ -5,8 +5,8 @@ from facenet_pytorch import MTCNN
 from models.image.vit_detector import get_fake_prob as vit_fake_prob, load_vit
 from models.image.siglip_detector import get_fake_prob as siglip_fake_prob, load_siglip
 
-VIT_WEIGHT    = 0.25
-SIGLIP_WEIGHT = 0.75
+VIT_WEIGHT    = 0.50
+SIGLIP_WEIGHT = 0.50
 
 DEVICE = (
     "cuda" if torch.cuda.is_available()
@@ -39,21 +39,19 @@ def classify_image(image_bytes: bytes) -> dict:
             print(f"[ensemble] Face crop failed: {e}")
 
     # --- ROLE 1: ViT (Face Detective) ---
-    # ViT ONLY looks at the focused face to prevent landscape-squashing false positives
     vit_fake = vit_fake_prob(focused_image)
 
     # --- ROLE 2: SigLIP (Scene Detective) ---
-    # SigLIP looks at the FULL original image to catch Midjourney/Diffusion backgrounds
     siglip_fake = siglip_fake_prob(original_image)
 
-    # --- SMART OVERRIDE LOGIC ---
-    # If the Face Detective finds a face-swap, it overrides.
+    # --- SMART OVERRIDE LOGIC WITH BOOSTING ---
+    # If ViT catches a face-swap, we multiply the score by 1.5 to boost system confidence!
     if vit_fake >= 0.50:
-        final_fake_score = vit_fake
-    # If the Scene Detective finds a Diffusion background, it overrides.
+        final_fake_score = min(0.98, vit_fake * 1.5)
+    # If SigLIP catches a Diffusion background, we use the high score directly
     elif siglip_fake >= 0.80:
         final_fake_score = siglip_fake
-    # If neither is certain, fallback to the weighted average.
+    # For borderline / real images, we use a balanced 50/50 average
     else:
         final_fake_score = (VIT_WEIGHT * vit_fake) + (SIGLIP_WEIGHT * siglip_fake)
 
