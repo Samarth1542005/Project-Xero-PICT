@@ -6,9 +6,11 @@
 
 /* ── CSS Custom Properties ── */
 :root {
-  /* Transitions */
-  --transition:      0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions & Easing */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition:      0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  --transition-slow: 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-out-expo:   cubic-bezier(0.19, 1, 0.22, 1);
   
   /* Typography */
   --font-sans:    'Plus Jakarta Sans', system-ui, sans-serif;
@@ -46,6 +48,7 @@
 
 [data-theme="dark"] {
   --color-bg:            #050810;
+  --color-bg-rgb:        5, 8, 16;
   --color-surface:       #0c1120;
   --color-surface-2:     #111827;
   --color-border:        rgba(255,255,255,0.08);
@@ -94,10 +97,11 @@
 
 [data-theme="light"] {
   --color-bg:            #f8fafc;
+  --color-bg-rgb:        248, 250, 252;
   --color-surface:       #ffffff;
   --color-surface-2:     #f1f5f9;
   --color-border:        rgba(0,0,0,0.08);
-  --color-border-strong: rgba(0,0,0,0.14);
+  --color-border-strong: rgba(0,0,0,0.15);
 
   --color-accent:        #4f46e5;
   --color-accent-glow:   rgba(79,70,229,0.2);
@@ -148,6 +152,54 @@ button {
   font-family: inherit;
   border: none;
   outline: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-30px) scale(1.05); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(30px) scale(0.95); }
+}
+
+@keyframes scanline-sweep {
+  0%   { top: -20%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.orb {
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.orb-purple { 
+  background: radial-gradient(circle, rgba(99,102,241,0.4) 0%, transparent 70%); 
+  animation: float 15s infinite ease-in-out;
+}
+.orb-cyan { 
+  background: radial-gradient(circle, rgba(34,211,238,0.3) 0%, transparent 70%); 
+  animation: float-reverse 20s infinite ease-in-out;
+}
+.orb-pink { 
+  background: radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%); 
+  animation: float 12s infinite ease-in-out;
+}
+
+.scanline-overlay {
+  position: absolute;
+  left: 0; right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--color-cyan), transparent);
+  opacity: 0.5;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 0 40px var(--color-cyan-glow);
+  animation: scanline-sweep 3s infinite linear;
 }
 
 a {
@@ -209,8 +261,18 @@ a {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); }
-  50%       { box-shadow: 0 0 50px var(--color-accent-glow), 0 0 80px rgba(99,102,241,0.2); }
+  0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); transform: scale(1); }
+  50%       { box-shadow: 0 0 50px var(--color-accent-glow), 0 0 80px rgba(99,102,241,0.2); transform: scale(1.02); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); filter: blur(8px); }
+  to   { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+@keyframes drawIn {
+  from { width: 0; }
+  to   { width: 100%; }
 }
 
 @keyframes scanLine {

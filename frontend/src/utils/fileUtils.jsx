@@ -47,19 +47,33 @@ export async function simulateAnalysis(file) {
   await new Promise(r => setTimeout(r, 2200 + Math.random() * 1500));
   const rand = Math.random();
   const verdict = rand > 0.6 ? 'fake' : (rand > 0.35 ? 'suspicious' : 'real');
-  const confidence = Math.floor(82 + Math.random() * 17);
+  const confidence = Math.floor(75 + rand * 24);
   
+  const explanations = {
+    fake: "Our neural pipeline has detected significant forensic artifacts in the primary facial region. We've identified inconsistent pixel gradients that do not align with natural skin subsurface scattering. Additionally, high-frequency noise analysis reveals localized frequency peaks commonly associated with GAN-based generation methods. Multiple temporal jitters were also found in the orbital regions, suggesting that this media was manipulated using an advanced auto-encoder architecture. The forensic probability of this being a synthetic asset is extremely high.",
+    suspicious: "The analysis shows minor architectural anomalies in the eye regions and unusual lighting global-consistency scores. While the primary facial features appear consistent, there is a measurable discrepancy in the background's semantic continuity compared to the foreground subjects. We recommend manual review of these specific forensic indicators before final validation.",
+    real: "After a comprehensive multi-modal forensic audit, no traces of structural or architectural manipulation were found. The image maintains consistent grain noise, natural lighting gradients, and perfect semantic continuity across all detected regions. Neural confidence for authenticity is established within high-certainty parameters."
+  };
+
   const regions = verdict === 'real' ? [] : [
-    { id: 'r1', label: 'Face Gradients', x: 30, y: 35, w: 40, h: 45, color: '#ef4444', issueId: 'i1' },
-    { id: 'r2', label: 'Eye Artifacts', x: 38, y: 42, w: 24, h: 10, color: '#f59e0b', issueId: 'i2' }
+    { id: 'r1', label: 'Face Gradients', x: 30, y: 25, w: 40, h: 45, color: '#ef4444', issueId: 'i1' },
+    { id: 'r2', label: 'Eye Artifacts', x: 38, y: 38, w: 24, h: 10, color: '#f59e0b', issueId: 'i2' },
+    { id: 'r3', label: 'Lip Sync Jitter', x: 42, y: 55, w: 16, h: 8, color: '#f59e0b', issueId: 'i3' },
+    { id: 'r4', label: 'Ear Blurring', x: 26, y: 40, w: 6, h: 12, color: '#22d3ee', issueId: 'i4' },
+    { id: 'r5', label: 'Hair Line Grain', x: 32, y: 20, w: 35, h: 15, color: '#ef4444', issueId: 'i5' }
   ];
 
   const issues = verdict === 'real' ? [] : [
-    { id: 'i1', label: 'Inconsistent pixel patterns detected on facial surface', severity: 'high' },
-    { id: 'i2', label: 'Temporal jitter in orbital regions', severity: 'medium' }
+    { id: 'i1', label: 'Neural surface scattering anomaly detected on right cheek region.', severity: 'high' },
+    { id: 'i2', label: 'Bilateral asymmetry in orbital reflections confirms synthetic origin.', severity: 'medium' },
+    { id: 'i5', label: 'Frequency-domain noise mismatch at hair-background boundary.', severity: 'high' },
+    { id: 'i3', label: 'Temporal Lip-Sync inconsistency detected (Latent mismatch).', severity: 'medium' },
+    { id: 'i4', label: 'Peripheral ear region shows semantic blur artifacts.', severity: 'low' },
+    { id: 'i6', label: 'Unexpected spectral peak at 14.2kHz (Spatial Noise).', severity: 'medium' },
+    { id: 'i7', label: 'Subtle lighting vector divergence in background shadows.', severity: 'low' }
   ];
 
-  return { verdict, confidence, regions, issues };
+  return { verdict, confidence, regions, issues, explanation: explanations[verdict] };
 }
 
 export const TYPE_ICON = {

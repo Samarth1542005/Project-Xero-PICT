@@ -29,15 +29,15 @@ export default function HeroSection() {
       <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '60px 24px' }}>
 
         {/* Badge */}
-        <div style={{ marginBottom: '28px', animation: 'fadeInUp 0.6s ease both' }}>
-          <span className="badge badge-accent"><Shield size={12} /> AI-Powered Deepfake Detection</span>
+        <div style={{ marginBottom: '28px', animation: 'fadeInUp 0.8s var(--ease-out-expo) both' }}>
+          <span className="badge badge-accent" style={{ padding: '8px 20px', borderRadius: '12px' }}><Shield size={14} /> AI-Powered Deepfake Detection</span>
         </div>
 
         {/* Headline */}
         <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-          fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em',
-          marginBottom: '24px', animation: 'fadeInUp 0.7s 0.1s ease both',
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(3.2rem, 8vw, 6.5rem)',
+          fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.04em',
+          marginBottom: '28px', animation: 'fadeInUp 0.8s 0.1s var(--ease-out-expo) both',
         }}>
           Detect Deepfakes
           <br />
@@ -46,9 +46,9 @@ export default function HeroSection() {
 
         {/* Subtitle */}
         <p style={{
-          fontSize: 'clamp(1rem, 2vw, 1.2rem)', color: 'var(--color-text-muted)',
-          maxWidth: '600px', margin: '0 auto 40px', lineHeight: 1.75,
-          animation: 'fadeInUp 0.7s 0.2s ease both',
+          fontSize: 'clamp(1.1rem, 2.2vw, 1.35rem)', color: 'var(--color-text-muted)',
+          maxWidth: '680px', margin: '0 auto 48px', lineHeight: 1.6,
+          animation: 'fadeInUp 0.8s 0.2s var(--ease-out-expo) both',
         }}>
           Upload multiple files of any media format and let Project Xero's neural pipeline analyze them
           for manipulation — with visual region-level explainability, confidence scoring,
@@ -56,49 +56,68 @@ export default function HeroSection() {
         </p>
 
         {/* Feature pills */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '44px', animation: 'fadeInUp 0.7s 0.3s ease both' }}>
-          {PILLS.map((pill) => (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center', marginBottom: '52px' }}>
+          {PILLS.map((pill, idx) => (
             <div key={pill.label} style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '7px 16px', borderRadius: '99px',
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '8px 20px', borderRadius: '99px',
               background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)',
-              fontSize: '0.8rem', fontWeight: 500, color: 'var(--color-text-muted)',
-            }}>
-              <span style={{ color: 'var(--color-accent)' }}>{pill.icon}</span>
+              fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-muted)',
+              animation: `fadeInUp 0.8s ${0.3 + idx * 0.1}s var(--ease-out-expo) both`,
+              transition: 'all var(--transition)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.background = 'var(--color-surface)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.background = 'var(--color-surface-subtle)'; }}
+            >
+              <span style={{ color: 'var(--color-accent)', display: 'flex' }}>{pill.icon}</span>
               {pill.label}
             </div>
           ))}
         </div>
 
         {/* CTAs */}
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeInUp 0.7s 0.4s ease both' }}>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeInUp 0.8s 0.6s var(--ease-out-expo) both' }}>
           <Button 
-            variant="xero"
+            className="btn-primary"
+            style={{ 
+              height: 'auto', 
+              padding: '16px 36px', 
+              fontSize: '1.05rem', 
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, var(--color-accent), var(--color-cyan))',
+              border: 'none',
+              boxShadow: '0 8px 30px var(--color-accent-glow)',
+            }}
             onClick={() => document.getElementById('detect')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            Start Detection <ArrowRight size={18} />
+            Launch Detector <ArrowRight size={20} style={{ marginLeft: '10px' }} />
           </Button>
-          <a href="#how-it-works" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px' }}>
+          <button 
+            className="btn-secondary" 
+            style={{ padding: '16px 36px', fontSize: '1.05rem', borderRadius: '14px' }}
+            onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+          >
             How It Works
-          </a>
+          </button>
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'flex', gap: '48px', justifyContent: 'center', marginTop: '72px', flexWrap: 'wrap', animation: 'fadeInUp 0.7s 0.5s ease both' }}>
+        <div style={{ display: 'flex', gap: '64px', justifyContent: 'center', marginTop: '80px', flexWrap: 'wrap' }}>
           {[
             { value: '97.4%', label: 'Detection Accuracy' },
             { value: '<2s',   label: 'Avg. Analysis Time' },
             { value: '6+',    label: 'Detection Modalities' },
-          ].map((stat) => (
-            <div key={stat.label} style={{ textAlign: 'center' }}>
+          ].map((stat, idx) => (
+            <div key={stat.label} style={{ textAlign: 'center', animation: `fadeInUp 0.8s ${0.7 + idx * 0.1}s var(--ease-out-expo) both` }}>
               <div style={{
-                fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800,
+                fontFamily: 'var(--font-display)', fontSize: '2.8rem', fontWeight: 800,
                 color: 'var(--color-text)',
-                lineHeight: 1, marginBottom: '6px',
+                lineHeight: 1, marginBottom: '8px',
+                textShadow: '0 0 20px rgba(var(--color-bg-rgb), 0.5)',
               }}>
                 {stat.value}
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)', fontWeight: 500 }}>
+              <div style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {stat.label}
               </div>
             </div>

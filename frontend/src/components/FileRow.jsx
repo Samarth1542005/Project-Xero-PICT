@@ -9,6 +9,7 @@ const STATUS_META = {
   real:       { icon: <CheckCircle2 size={15} />,    color: 'var(--color-real)',          label: 'Authentic' },
   fake:       { icon: <XCircle size={15} />,         color: 'var(--color-fake)',          label: 'Deepfake' },
   suspicious: { icon: <AlertTriangle size={15} />,   color: 'var(--color-suspicious)',    label: 'Suspicious' },
+  error:      { icon: <XCircle size={15} />,         color: 'var(--color-fake)',          label: 'Failed' },
 };
 
 export default function FileRow({ file, status, result, onSelect, onRemove, isSelected }) {
