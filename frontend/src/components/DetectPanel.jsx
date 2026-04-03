@@ -5,7 +5,7 @@ import {
   Eye, EyeOff, Layers, RefreshCw, Loader2, Info, File
 } from 'lucide-react';
 import FileRow from './FileRow';
-import { isImage, createPreviewUrl, simulateAnalysis, getVerdictMeta } from '../utils/fileUtils';
+import { isImage, createPreviewUrl, simulateAnalysis, getVerdictMeta } from '../utils/fileUtils.jsx';
 import { detectDeepfake } from '../services/api'; 
 import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
@@ -109,10 +109,25 @@ function ConfidenceBar({ value, verdict }) {
 function IssueList({ issues, activeRegion, setActiveRegion }) {
   if (!issues?.length) {
     return (
-      <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--color-real)', fontSize: '0.875rem' }}>
-        <CheckCircle2 size={28} style={{ margin: '0 auto 8px' }} />
-        <div style={{ fontWeight: 600 }}>No anomalies detected</div>
-        <div style={{ color: 'var(--color-text-subtle)', fontSize: '0.78rem', marginTop: '4px' }}>All facial features appear authentic</div>
+      <div style={{ 
+        display: 'flex', alignItems: 'center', gap: '12px',
+        padding: '12px 14px', borderRadius: '8px',
+        background: 'rgba(34, 197, 94, 0.08)',
+        border: '1px solid rgba(34, 197, 94, 0.15)',
+        animation: 'fadeInUp 0.6s 0.6s var(--ease-out-expo) both'
+      }}>
+        <div style={{ 
+          width: 28, height: 28, borderRadius: '50%', 
+          background: 'rgba(34, 197, 94, 0.15)', color: '#10b981', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <CheckCircle2 size={16} strokeWidth={3} />
+        </div>
+        <div>
+          <div style={{ fontSize: '13px', color: '#065f46', fontWeight: 600, lineHeight: 1.2 }}>No anomalies detected</div>
+          <div style={{ fontSize: '12px', color: '#10b981', fontWeight: 500, marginTop: '2px', lineHeight: 1.2 }}>All facial features appear authentic</div>
+        </div>
       </div>
     );
   }
@@ -121,69 +136,45 @@ function IssueList({ issues, activeRegion, setActiveRegion }) {
     <div style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '12px',
+      gap: '10px',
       maxHeight: '340px',
       overflowY: 'auto',
       paddingRight: '6px',
     }}>
-      {issues.length > 0 ? (
-        issues.map((issue, index) => {
-          const isActive = activeRegion === issue.id;
-          const sc = SEV[issue.severity] || '#94a3b8';
-          return (
-            <div
-              key={issue.id}
-              onMouseEnter={() => setActiveRegion(issue.id)}
-              onMouseLeave={() => setActiveRegion(null)}
-              style={{
-                display: 'flex', alignItems: 'flex-start', gap: '14px',
-                padding: '14px 16px', borderRadius: '12px',
-                border: `1px solid ${isActive ? sc + '66' : 'var(--color-border)'}`,
-                background: isActive ? `${sc}15` : 'rgba(255,255,255,0.02)',
-                cursor: 'default', 
-                transition: 'all var(--transition)',
-                transform: isActive ? 'translateX(4px)' : 'translateX(0)',
-                animation: `fadeInUp 0.6s ${0.6 + index * 0.08}s var(--ease-out-expo) both`
-              }}
-            >
-              <div style={{ 
-                width: 32, height: 32, borderRadius: '8px', 
-                background: `${sc}15`, color: sc, 
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0, marginTop: '2px'
-              }}>
-                <AlertTriangle size={16} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.81rem', color: 'var(--color-text)', fontWeight: 600, marginBottom: '2px' }}>{issue.label}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)', lineHeight: 1.4 }}>Forensic anomaly detected in localized raster data.</div>
-              </div>
+      {issues.map((issue, index) => {
+        const isActive = activeRegion === issue.id;
+        const sc = SEV[issue.severity] || '#94a3b8';
+        return (
+          <div
+            key={issue.id}
+            onMouseEnter={() => setActiveRegion(issue.id)}
+            onMouseLeave={() => setActiveRegion(null)}
+            style={{
+              display: 'flex', alignItems: 'flex-start', gap: '12px',
+              padding: '12px 14px', borderRadius: '10px',
+              border: `1px solid ${isActive ? sc + '44' : 'rgba(0,0,0,0.03)'}`,
+              background: isActive ? `${sc}10` : '#f8fafc',
+              cursor: 'default', 
+              transition: 'all var(--transition)',
+              transform: isActive ? 'translateX(4px)' : 'translateX(0)',
+              animation: `fadeInUp 0.6s ${0.6 + index * 0.08}s var(--ease-out-expo) both`
+            }}
+          >
+            <div style={{ 
+              width: 28, height: 28, borderRadius: '6px', 
+              background: `${sc}15`, color: sc, 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, marginTop: '2px'
+            }}>
+              <AlertTriangle size={14} />
             </div>
-          );
-        })
-      ) : (
-        /* No anomalies detected alert row */
-        <div style={{ 
-          display: 'flex', alignItems: 'center', gap: '14px',
-          padding: '16px 18px', borderRadius: '10px',
-          background: 'rgba(34,197,94,0.08)',
-          border: '1px solid rgba(34,197,94,0.15)',
-          animation: 'fadeInUp 0.6s 0.6s var(--ease-out-expo) both'
-        }}>
-          <div style={{ 
-            width: 32, height: 32, borderRadius: '50%', 
-            background: 'rgba(34,197,94,0.2)', color: '#22c55e', 
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <CheckCircle2 size={18} strokeWidth={3} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '12px', color: '#1e293b', fontWeight: 600, marginBottom: '2px' }}>{issue.label}</div>
+              <div style={{ fontSize: '11px', color: '#64748b', lineHeight: 1.4 }}>Forensic anomaly detected in localized raster data.</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: '13px', color: '#22c55e', fontWeight: 600 }}>No anomalies detected</div>
-            <div style={{ fontSize: '12px', color: 'rgba(34,197,94,0.7)', fontWeight: 500 }}>All facial features appear authentic</div>
-          </div>
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 }
@@ -206,8 +197,8 @@ export default function DetectPanel() {
   const analyzeFile = useCallback(async (file, idx) => {
     setFiles((prev) => { const c = [...prev]; if (c[idx]) c[idx] = { ...c[idx], status: 'analyzing', error: null }; return c; });
     try {
-      // Temporarily using simulation to check UI/UX changes
-      const result = await simulateAnalysis(file);
+      // Switch from simulation to real backend API call
+      const result = await detectDeepfake(file);
       setFiles((prev) => { const c = [...prev]; if (c[idx]) c[idx] = { ...c[idx], status: result.verdict, result }; return c; });
     } catch (err) {
       setFiles((prev) => { const c = [...prev]; if (c[idx]) c[idx] = { ...c[idx], status: 'error', error: err.message }; return c; });
@@ -384,56 +375,53 @@ export default function DetectPanel() {
               {/* Result card with staggered entry */}
               {current.result && !isAnalyzing && (
                 <Card 
-                  className="glass-strong" 
                   style={{ 
-                    background: 'var(--color-surface)',
-                    border: '0.5px solid var(--color-border-strong)',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
+                    background: '#ffffff',
+                    border: '0.5px solid rgba(0,0,0,0.1)',
+                    borderRadius: '14px',
                     width: '100%',
                     padding: '20px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
                     animation: 'slideInRight 0.6s var(--ease-out-expo) both'
                   }}
                 >
                   {/* Single Row Header */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', animation: 'fadeInUp 0.6s 0.1s var(--ease-out-expo) both' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: 800, color: 'var(--color-text)', letterSpacing: '-0.01em' }}>REPORT</span>
-                      <Badge variant="default" style={{ 
-                        backgroundColor: verdictColor, 
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b', letterSpacing: '0.02em' }}>REPORT</span>
+                      <Badge style={{ 
+                        backgroundColor: current.result.verdict === 'real' ? '#10b981' : (current.result.verdict === 'fake' ? '#ef4444' : '#f59e0b'), 
                         color: '#fff', 
-                        padding: '4px 12px',
+                        padding: '3px 10px',
                         borderRadius: '99px',
-                        fontSize: '11px',
-                        fontWeight: 800,
+                        fontSize: '10px',
+                        fontWeight: 700,
                         textTransform: 'uppercase',
-                        letterSpacing: '0.02em',
+                        letterSpacing: '0.04em',
                         border: 'none'
                       }}>
                         {verdictMeta?.label}
                       </Badge>
                     </div>
-                    <RefreshCw size={15} className="opacity-40 cursor-pointer hover:opacity-100 transition-opacity" />
+                    <RefreshCw size={15} onClick={reScan} className="cursor-pointer text-slate-400 hover:text-slate-600 transition-colors" />
                   </div>
 
                   {/* Neural Confidence Section — Secondary Surface Block */}
                   <div style={{ 
-                    padding: '14px', 
-                    background: 'rgba(255,255,255,0.03)', 
-                    border: '1px solid var(--color-border)', 
+                    padding: '12px 14px', 
+                    background: '#f8fafc', 
                     borderRadius: '8px',
-                    marginBottom: '20px',
-                    animation: 'fadeInUp 0.6s 0.2s var(--ease-out-expo) both'
+                    marginBottom: '16px'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
-                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-text-subtle)', opacity: 0.5 }}>Neural Confidence</div>
-                      <div style={{ fontSize: '28px', fontWeight: 800, color: verdictColor, lineHeight: 1 }}>{current.result.confidence}%</div>
+                      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>Neural Confidence</div>
+                      <div style={{ fontSize: '26px', fontWeight: 800, color: current.result.verdict === 'real' ? '#10b981' : '#10b981', lineHeight: 1 }}>{current.result.confidence}%</div>
                     </div>
-                    <div style={{ height: '5px', width: '100%', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{ height: '6px', width: '100%', background: '#e2e8f0', borderRadius: '99px', overflow: 'hidden' }}>
                       <div style={{ 
                         height: '100%', 
                         width: `${current.result.confidence}%`, 
-                        background: verdictColor, 
+                        background: '#10b981', 
                         borderRadius: '99px',
                         transition: 'width 1.5s var(--ease-out-expo)',
                         animation: 'drawIn 1.5s var(--ease-out-expo) both'
@@ -443,31 +431,28 @@ export default function DetectPanel() {
 
                   {current.result.explanation && (
                     <div style={{ 
-                      marginBottom: '20px', 
-                      fontSize: '13px', 
-                      color: 'var(--color-text-muted)', 
-                      lineHeight: 1.6,
-                      wordBreak: 'break-word',
-                      overflowWrap: 'anywhere',
-                      width: '100%',
+                      marginBottom: '16px', 
+                      padding: '0 4px',
+                      fontSize: '12px', 
+                      color: '#475569', 
+                      lineHeight: 1.5,
+                      fontWeight: 500,
                       animation: 'fadeInUp 0.8s 0.4s var(--ease-out-expo) both'
                     }}>
                       {current.result.explanation}
                     </div>
                   )}
 
-                  <div style={{ marginTop: '20px' }}>
+                  <div style={{ marginTop: '16px', borderTop: '1px solid #f1f5f9', paddingTop: '4px' }}>
                     <div style={{ 
                       fontSize: '11px', 
                       fontWeight: 700, 
                       textTransform: 'uppercase', 
-                      letterSpacing: '0.1em', 
-                      color: 'var(--color-text-subtle)', 
-                      opacity: 0.5,
-                      margin: '14px 0',
-                      animation: 'fadeInUp 0.8s 0.5s var(--ease-out-expo) both'
+                      letterSpacing: '0.08em', 
+                      color: '#94a3b8', 
+                      margin: '14px 0'
                     }}>
-                      Forensic Indicators
+                      FORENSIC INDICATORS
                     </div>
                     <IssueList issues={current.result.issues} activeRegion={activeRegion} setActiveRegion={setActiveRegion} />
                   </div>

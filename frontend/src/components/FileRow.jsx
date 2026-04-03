@@ -1,7 +1,7 @@
 // FileRow.jsx — Single file entry in the upload list
 import React from 'react';
 import { Image, X, CheckCircle2, AlertTriangle, XCircle, Loader2, File } from 'lucide-react';
-import { formatFileSize, getFileExtension, isImage } from '../utils/fileUtils';
+import { formatFileSize, getFileExtension, isImage } from '../utils/fileUtils.jsx';
 
 const STATUS_META = {
   pending:    { icon: null,                          color: 'var(--color-text-muted)',    label: 'Queued' },

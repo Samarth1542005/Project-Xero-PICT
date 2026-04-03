@@ -14,7 +14,7 @@ export function getType(filename) {
   return "unknown";
 }
 
-export function isValidImageType(file) {
+export function isImage(file) {
   return file.type.startsWith('image/');
 }
 
