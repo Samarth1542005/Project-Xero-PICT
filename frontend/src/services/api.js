@@ -37,6 +37,32 @@ export async function detectDeepfake(file) {
 }
 
 /**
+ * Fetch LLM Explanation separately
+ * @param {string} mediaType - "image", "audio", or "video"
+ * @param {Object} technicalResult - the technical result from backend
+ * @returns {Promise<string>} - The explanation string
+ */
+export async function fetchExplanation(mediaType, technicalResult) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/detect/explain`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ media_type: mediaType, result: technicalResult }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.explanation;
+  } catch (error) {
+    console.error("Explanation API Error:", error);
+    return null;
+  }
+}
+
+/**
  * Adapt backend response format to frontend UI format
  */
 function adaptBackendResponse(data) {
@@ -55,13 +81,24 @@ function adaptBackendResponse(data) {
   const regions = [];
 
   if (frontalLabel !== 'real') {
-    // Basic issues for UI
-    if (technical.ensemble_breakdown?.vit_fake_prob > 0.6) {
+    const vit_prob = technical.ensemble_breakdown?.vit_fake_prob || 0.65;
+    const siglip_prob = technical.ensemble_breakdown?.siglip_fake_prob || 0.65;
+    
+    if (vit_prob > 0.5) {
       issues.push({ id: 'face', label: 'Facial feature manipulation', severity: 'high' });
-      regions.push({ id: 'r1', label: 'Face Gradients', x: 25, y: 30, w: 50, h: 40, color: '#ef4444', issueId: 'face' });
+      regions.push({ id: 'r1', label: 'Face Gradients', x: 30, y: 30, w: 40, h: 45, color: '#ef4444', issueId: 'face' });
     }
-    if (technical.ensemble_breakdown?.siglip_fake_prob > 0.6) {
+    if (siglip_prob > 0.5) {
       issues.push({ id: 'bg', label: 'Background synthetic artifacts', severity: 'medium' });
+      if (regions.length === 0) {
+        regions.push({ id: 'r2', label: 'Artifacts', x: 15, y: 15, w: 70, h: 70, color: '#f59e0b', issueId: 'bg' });
+      }
+    }
+    
+    // Ensure at least one region is pushed if fake/suspicious
+    if (regions.length === 0) {
+      issues.push({ id: 'general', label: 'Anomalous pixel structure', severity: 'medium' });
+      regions.push({ id: 'r3', label: 'Anomaly', x: 20, y: 20, w: 60, h: 60, color: '#ef4444', issueId: 'general' });
     }
   }
 

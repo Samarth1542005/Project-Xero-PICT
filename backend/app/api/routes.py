@@ -3,6 +3,7 @@ import sys
 import os
 
 from fastapi import APIRouter, File, UploadFile, HTTPException
+from pydantic import BaseModel
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
 
@@ -61,6 +62,19 @@ def health():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Explain
+# ─────────────────────────────────────────────────────────────────────────────
+class ExplainRequest(BaseModel):
+    media_type: str
+    result: dict
+
+@router.post("/detect/explain")
+async def explain(req: ExplainRequest):
+    explanation = await generate_explanation(req.media_type, req.result)
+    return {"explanation": explanation}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Image
 # ─────────────────────────────────────────────────────────────────────────────
 @router.post("/detect/image")
@@ -78,9 +92,8 @@ async def detect_image(file: UploadFile = File(...)):
 
         loop        = asyncio.get_event_loop()
         result      = await loop.run_in_executor(None, classify_image, image_bytes)
-        explanation = await generate_explanation("image", result)
-
-        return format_response("image", file.filename, result, explanation)
+        
+        return format_response("image", file.filename, result, None)
 
     except HTTPException:
         raise
@@ -106,9 +119,8 @@ async def detect_audio(file: UploadFile = File(...)):
 
         loop        = asyncio.get_event_loop()
         result      = await loop.run_in_executor(None, classify_audio, audio_bytes)
-        explanation = await generate_explanation("audio", result)
-
-        return format_response("audio", file.filename, result, explanation)
+        
+        return format_response("audio", file.filename, result, None)
 
     except HTTPException:
         raise
@@ -154,9 +166,8 @@ async def detect_video(file: UploadFile = File(...)):
             })
 
         result      = aggregate_frame_results(frame_results, fps, duration_s)
-        explanation = await generate_explanation("video", result)
-
-        return format_response("video", file.filename, result, explanation)
+        
+        return format_response("video", file.filename, result, None)
 
     except HTTPException:
         raise

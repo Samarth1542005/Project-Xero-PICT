@@ -294,6 +294,33 @@ export default function DetectPanel() {
     const result = await simulateAnalysis(file);
     setFiles((prev) => { const c = [...prev]; if (c[idx]) c[idx] = { ...c[idx], status: result.verdict, result }; return c; });
     setSelectedIdx(idx);
+
+    // Fetch explanation in background if not present
+    if (!result.explanation) {
+      import('../services/api').then(({ fetchExplanation }) => {
+        let mediaType = 'image';
+        if (file.type.startsWith('video/')) mediaType = 'video';
+        else if (file.type.startsWith('audio/')) mediaType = 'audio';
+
+        fetchExplanation(mediaType, result.technical).then(exp => {
+          if (exp) {
+            setFiles(prev => {
+              const current = [...prev];
+              if (current[idx] && current[idx].result) {
+                current[idx] = {
+                  ...current[idx],
+                  result: {
+                    ...current[idx].result,
+                    explanation: exp
+                  }
+                };
+              }
+              return current;
+            });
+          }
+        });
+      });
+    }
   }, []);
 
   const addFiles = useCallback((rawFiles) => {
@@ -333,10 +360,10 @@ export default function DetectPanel() {
           <p className="section-subtitle">Upload multiple files of any format and receive a full AI-powered authenticity report with region-level visual explanation.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: current ? '1fr 1.15fr' : '1fr', gap: '24px', maxWidth: current ? '1100px' : '680px', margin: '0 auto', transition: 'all 0.4s ease' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', maxWidth: '1100px', margin: '0 auto', transition: 'all 0.4s ease', width: '100%' }}>
 
-          {/* LEFT — upload + file list */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* TOP ROW: Upload + File List */}
+          <div style={{ display: 'grid', gridTemplateColumns: files.length > 0 ? '1fr 1fr' : '1fr', gap: '24px', maxWidth: files.length > 0 ? '100%' : '680px', margin: '0 auto', width: '100%' }}>
 
             {/* Drop zone */}
             <div
@@ -383,9 +410,12 @@ export default function DetectPanel() {
             )}
           </div>
 
-          {/* RIGHT — results */}
+          {/* BOTTOM ROW: Results */}
           {current && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'fadeInUp 0.5s ease' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: '24px', animation: 'fadeInUp 0.5s ease' }}>
+
+              {/* Left Column of Bottom Row: Media Preview */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               {/* Image / Video / Audio preview */}
               <div className="card" style={{ padding: '16px' }}>
@@ -441,6 +471,10 @@ export default function DetectPanel() {
                   </div>
                 )}
               </div>
+              </div>
+
+              {/* Right Column of Bottom Row: Report & LLM */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
               {/* Result card */}
               {current.result && !isAnalyzing && (
@@ -481,7 +515,7 @@ export default function DetectPanel() {
                         <GroqExplanation
                           explanation={current.result.explanation}
                           verdict={current.result.verdict}
-                          isLoading={false}
+                          isLoading={!current.result.explanation}
                         />
                       </div>
                     )}
@@ -507,6 +541,7 @@ export default function DetectPanel() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>
