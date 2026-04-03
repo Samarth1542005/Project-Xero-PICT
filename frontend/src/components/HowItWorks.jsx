@@ -6,8 +6,8 @@ const STEPS = [
   {
     step: '01',
     icon: <Upload size={24} />,
-    title: 'Image Ingestion',
-    desc: 'Upload any facial image via drag-and-drop or file picker. We accept JPG, PNG, WEBP and BMP.',
+    title: 'Media Ingestion',
+    desc: 'Upload multiple files of any format via drag-and-drop. We support image, video, and audio forensics.',
     color: '#6366f1',
   },
   {

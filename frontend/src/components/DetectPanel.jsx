@@ -2,10 +2,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
   Upload, Image as ImageIcon, CheckCircle2, XCircle, AlertTriangle,
-  Eye, EyeOff, Layers, RefreshCw, Loader2, Info
+  Eye, EyeOff, Layers, RefreshCw, Loader2, Info, File
 } from 'lucide-react';
 import FileRow from './FileRow';
-import { isValidImageType, createPreviewUrl, simulateAnalysis, getVerdictMeta } from '../utils/fileUtils';
+import { isImage, createPreviewUrl, simulateAnalysis, getVerdictMeta } from '../utils/fileUtils';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
 
 const VERDICT_ICON = {
   real:       <CheckCircle2 size={22} />,
@@ -117,8 +119,8 @@ function IssueList({ issues, activeRegion, setActiveRegion }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 14px', borderRadius: '8px',
-              border: `1px solid ${isActive ? sc + '55' : 'rgba(255,255,255,0.06)'}`,
-              background: isActive ? `${sc}10` : 'rgba(255,255,255,0.02)',
+              border: `1px solid ${isActive ? sc + '55' : 'var(--color-border-subtle)'}`,
+              background: isActive ? `${sc}10` : 'var(--color-surface-subtle)',
               cursor: 'default', transition: 'all 0.2s',
             }}
           >
@@ -157,7 +159,7 @@ export default function DetectPanel() {
   }, []);
 
   const addFiles = useCallback((rawFiles) => {
-    const valid = Array.from(rawFiles).filter(isValidImageType);
+    const valid = Array.from(rawFiles);
     if (!valid.length) return;
     const entries = valid.map((f) => ({ file: Object.assign(f, { previewUrl: createPreviewUrl(f) }), status: 'pending', result: null }));
     setFiles((prev) => {
@@ -189,8 +191,8 @@ export default function DetectPanel() {
       <div className="container" style={{ position: 'relative', zIndex: 1 }}>
         <div className="section-header">
           <div className="section-label"><Layers size={13} /> Detection Engine</div>
-          <h2 className="section-title">Analyze Your Image</h2>
-          <p className="section-subtitle">Upload a facial image and receive a full AI-powered authenticity report with region-level visual explanation.</p>
+          <h2 className="section-title">Analyze Your Files</h2>
+          <p className="section-subtitle">Upload multiple files of any format and receive a full AI-powered authenticity report with region-level visual explanation.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: current ? '1fr 1.15fr' : '1fr', gap: '24px', maxWidth: current ? '1100px' : '680px', margin: '0 auto', transition: 'all 0.4s ease' }}>
@@ -206,9 +208,9 @@ export default function DetectPanel() {
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               style={{
-                border: `2px dashed ${dragging ? 'var(--color-accent)' : 'rgba(255,255,255,0.12)'}`,
+                border: `2px dashed ${dragging ? 'var(--color-accent)' : 'var(--color-border-strong)'}`,
                 borderRadius: 'var(--radius-lg)', padding: '48px 32px', textAlign: 'center', cursor: 'pointer',
-                background: dragging ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.02)',
+                background: dragging ? 'rgba(99,102,241,0.07)' : 'var(--color-surface-subtle)',
                 transition: 'all 0.25s ease',
                 boxShadow: dragging ? '0 0 40px var(--color-accent-glow)' : 'none',
               }}
@@ -223,10 +225,10 @@ export default function DetectPanel() {
                 <Upload size={26} color="var(--color-accent)" />
               </div>
               <p style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '6px', color: 'var(--color-text)' }}>
-                {dragging ? 'Drop to analyze' : 'Drop image here or click to upload'}
+                {dragging ? 'Drop to analyze' : 'Drop files here or click to upload'}
               </p>
-              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>JPG, PNG, WEBP, BMP · up to 20 MB</p>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={(e) => addFiles(e.target.files)} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)' }}>Any format · up to 100 MB</p>
+              <input ref={fileInputRef} type="file" multiple style={{ display: 'none' }} onChange={(e) => addFiles(e.target.files)} />
             </div>
 
             {/* File list */}
@@ -250,8 +252,13 @@ export default function DetectPanel() {
               {/* Image preview */}
               <div className="card" style={{ padding: '16px' }}>
                 <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#000', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {current.file.previewUrl && (
+                  {current.file.previewUrl && isImage(current.file) ? (
                     <img src={current.file.previewUrl} alt="Preview" style={{ width: '100%', height: 'auto', maxHeight: '320px', objectFit: 'contain', display: 'block', filter: isAnalyzing ? 'brightness(0.6)' : 'none', transition: 'filter 0.4s' }} />
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: 'var(--color-text-subtle)' }}>
+                      <File size={64} style={{ opacity: 0.3 }} />
+                      <span style={{ fontSize: '0.9rem' }}>No preview available for this file type</span>
+                    </div>
                   )}
                   <ScanAnimation active={isAnalyzing} />
                   {current.result && (
@@ -269,14 +276,14 @@ export default function DetectPanel() {
                 {current.result && (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
                     {current.result.verdict !== 'real' && (
-                      <button id="toggle-heatmap" onClick={() => setShowHeatmap((p) => !p)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: showHeatmap ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${showHeatmap ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`, color: showHeatmap ? '#a5b4fc' : 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s' }}>
+                      <button id="toggle-heatmap" onClick={() => setShowHeatmap((p) => !p)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: showHeatmap ? 'rgba(99,102,241,0.15)' : 'var(--color-surface-subtle)', border: `1px solid ${showHeatmap ? 'rgba(99,102,241,0.4)' : 'var(--color-border)'}`, color: showHeatmap ? 'var(--color-accent)' : 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s' }}>
                         {showHeatmap ? <Eye size={13} /> : <EyeOff size={13} />} Heatmap
                       </button>
                     )}
-                    <button id="toggle-explain" onClick={() => setShowExplain((p) => !p)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: showExplain ? 'rgba(34,211,238,0.1)' : 'rgba(255,255,255,0.05)', border: `1px solid ${showExplain ? 'rgba(34,211,238,0.3)' : 'rgba(255,255,255,0.1)'}`, color: showExplain ? 'var(--color-cyan)' : 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s' }}>
+                    <button id="toggle-explain" onClick={() => setShowExplain((p) => !p)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: showExplain ? 'rgba(34,211,238,0.1)' : 'var(--color-surface-subtle)', border: `1px solid ${showExplain ? 'rgba(34,211,238,0.3)' : 'var(--color-border)'}`, color: showExplain ? 'var(--color-cyan)' : 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s' }}>
                       <Layers size={13} /> Explanation
                     </button>
-                    <button id="btn-rescan" onClick={reScan} disabled={isAnalyzing} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s', marginLeft: 'auto', opacity: isAnalyzing ? 0.5 : 1 }}>
+                    <button id="btn-rescan" onClick={reScan} disabled={isAnalyzing} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '8px', background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 600, transition: 'all 0.2s', marginLeft: 'auto', opacity: isAnalyzing ? 0.5 : 1 }}>
                       <RefreshCw size={13} style={{ animation: isAnalyzing ? 'spin 0.8s linear infinite' : 'none' }} /> Re-scan
                     </button>
                   </div>
@@ -285,34 +292,39 @@ export default function DetectPanel() {
 
               {/* Result card */}
               {current.result && !isAnalyzing && (
-                <div className="card" style={{ padding: '20px', borderColor: `${verdictColor}30`, boxShadow: `0 0 40px ${VERDICT_GLOW[current.result.verdict]}`, animation: 'fadeInUp 0.5s ease' }}>
-                  {/* Verdict header */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: '12px', background: `${verdictColor}18`, border: `1px solid ${verdictColor}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: verdictColor, boxShadow: `0 0 16px ${verdictColor}40` }}>
-                      {VERDICT_ICON[current.result.verdict]}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-subtle)', marginBottom: '3px' }}>Verdict</div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: verdictColor }}>{verdictMeta?.label}</div>
-                    </div>
-                  </div>
-
-                  <ConfidenceBar value={current.result.confidence} verdict={current.result.verdict} />
-
-                  {showExplain && (
-                    <div style={{ marginTop: '20px' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-subtle)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Info size={12} /> Detected Issues
-                        {current.result.issues?.length > 0 && (
-                          <span style={{ marginLeft: '4px', background: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: '0.65rem', fontWeight: 700, padding: '1px 7px', borderRadius: '99px' }}>
-                            {current.result.issues.length}
-                          </span>
-                        )}
+                <Card className="glass-strong glow-accent animate-fade-in" style={{ border: `1px solid ${verdictColor}44` }}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Analysis Report</CardTitle>
+                    <Badge variant="xero" style={{ backgroundColor: `${verdictColor}22`, color: verdictColor, borderColor: `${verdictColor}44` }}>
+                      {verdictMeta?.label}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '24px' }}>
+                      <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: `${verdictColor}15`, color: verdictColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {current.result.verdict === 'real' ? <CheckCircle2 size={32} /> : (current.result.verdict === 'fake' ? <XCircle size={32} /> : <AlertTriangle size={32} />)}
                       </div>
-                      <IssueList issues={current.result.issues} activeRegion={activeRegion} setActiveRegion={setActiveRegion} />
+                      <div>
+                        <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-subtle)', marginBottom: '3px' }}>Forensic Confidence</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.5rem', color: verdictColor }}>{current.result.confidence}%</div>
+                      </div>
                     </div>
-                  )}
-                </div>
+
+                    <ConfidenceBar value={current.result.confidence} verdict={current.result.verdict} />
+
+                    {showExplain && (
+                      <div style={{ marginTop: '20px' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-text-subtle)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <Info size={12} /> Detected Forensic Artifacts
+                          {current.result.issues?.length > 0 && (
+                            <Badge variant="outline" className="ml-2 text-[10px] h-4 px-1.5">{current.result.issues.length}</Badge>
+                          )}
+                        </div>
+                        <IssueList issues={current.result.issues} activeRegion={activeRegion} setActiveRegion={setActiveRegion} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {/* Analyzing placeholder */}
@@ -342,7 +354,7 @@ export default function DetectPanel() {
           <div style={{ textAlign: 'center', marginTop: '32px', animation: 'fadeIn 0.5s ease' }}>
             <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
               {[
-                { icon: <ImageIcon size={20} />,                                          label: 'Drag & drop images' },
+                { icon: <Upload size={20} />,                                             label: 'Drag & drop files' },
                 { icon: <CheckCircle2 size={20} color="var(--color-real)" />,             label: 'Instant verdict' },
                 { icon: <Eye size={20} color="var(--color-cyan)" />,                      label: 'Visual heatmap' },
               ].map((hint) => (

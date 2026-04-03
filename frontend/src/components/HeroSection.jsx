@@ -1,6 +1,7 @@
 // HeroSection.jsx — Landing hero with animated headline and CTA
 import React from 'react';
 import { Shield, ArrowRight, Cpu, Eye, Zap } from 'lucide-react';
+import { Button } from './ui/button';
 
 const PILLS = [
   { icon: <Cpu size={13} />,  label: 'Neural Network Analysis' },
@@ -49,9 +50,9 @@ export default function HeroSection() {
           maxWidth: '600px', margin: '0 auto 40px', lineHeight: 1.75,
           animation: 'fadeInUp 0.7s 0.2s ease both',
         }}>
-          Upload any facial image and let Project Xero's neural pipeline analyze it
+          Upload multiple files of any media format and let Project Xero's neural pipeline analyze them
           for manipulation — with visual region-level explainability, confidence scoring,
-          and heatmap overlays.
+          and forensic report.
         </p>
 
         {/* Feature pills */}
@@ -60,7 +61,7 @@ export default function HeroSection() {
             <div key={pill.label} style={{
               display: 'flex', alignItems: 'center', gap: '6px',
               padding: '7px 16px', borderRadius: '99px',
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+              background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)',
               fontSize: '0.8rem', fontWeight: 500, color: 'var(--color-text-muted)',
             }}>
               <span style={{ color: 'var(--color-accent)' }}>{pill.icon}</span>
@@ -71,9 +72,12 @@ export default function HeroSection() {
 
         {/* CTAs */}
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', animation: 'fadeInUp 0.7s 0.4s ease both' }}>
-          <a href="#detect" className="btn-primary" style={{ fontSize: '1rem', padding: '14px 32px' }}>
-            Analyze an Image <ArrowRight size={18} />
-          </a>
+          <Button 
+            variant="xero"
+            onClick={() => document.getElementById('detect')?.scrollIntoView({ behavior: 'smooth' })}
+          >
+            Start Detection <ArrowRight size={18} />
+          </Button>
           <a href="#how-it-works" className="btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px' }}>
             How It Works
           </a>
@@ -88,9 +92,8 @@ export default function HeroSection() {
           ].map((stat) => (
             <div key={stat.label} style={{ textAlign: 'center' }}>
               <div style={{
-                fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 800,
-                background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800,
+                color: 'var(--color-text)',
                 lineHeight: 1, marginBottom: '6px',
               }}>
                 {stat.value}

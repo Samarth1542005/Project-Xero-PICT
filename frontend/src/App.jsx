@@ -13,9 +13,11 @@ import Modalities  from './components/Modalities';
 import StatsSection from './components/StatsSection';
 import Footer       from './components/Footer';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 export default function App() {
   return (
-    <>
+    <ThemeProvider>
       {/* Ambient effects */}
       <Particles />
       <Grain opacity={0.028} animated={false} />
@@ -33,6 +35,6 @@ export default function App() {
       </main>
 
       <Footer />
-    </>
+    </ThemeProvider>
   );
 }

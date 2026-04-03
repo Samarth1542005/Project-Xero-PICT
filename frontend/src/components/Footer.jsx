@@ -47,8 +47,8 @@ export default function Footer() {
               <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'linear-gradient(135deg, #6366f1, #22d3ee)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(99,102,241,0.4)' }}>
                 <Shield size={18} color="#fff" />
               </div>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', background: 'linear-gradient(90deg, #e2e8f0, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Project Xero
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', background: 'linear-gradient(90deg, var(--color-text), var(--color-accent))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                DeepShield
               </span>
             </div>
             <p style={{ fontSize: '0.85rem', color: 'var(--color-text-subtle)', lineHeight: 1.75, maxWidth: '300px', marginBottom: '24px' }}>
@@ -65,9 +65,9 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  style={{ width: 36, height: 36, borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)'; e.currentTarget.style.color = '#a5b4fc'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
+                  style={{ width: 36, height: 36, borderRadius: '8px', background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-accent-glow)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.color = 'var(--color-accent)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-surface-subtle)'; e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
                 >
                   {s.icon}
                 </a>

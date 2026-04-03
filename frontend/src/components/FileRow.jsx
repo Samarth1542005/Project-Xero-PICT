@@ -1,7 +1,7 @@
 // FileRow.jsx — Single file entry in the upload list
 import React from 'react';
-import { Image, X, CheckCircle2, AlertTriangle, XCircle, Loader2 } from 'lucide-react';
-import { formatFileSize, getFileExtension } from '../utils/fileUtils';
+import { Image, X, CheckCircle2, AlertTriangle, XCircle, Loader2, File } from 'lucide-react';
+import { formatFileSize, getFileExtension, isImage } from '../utils/fileUtils';
 
 const STATUS_META = {
   pending:    { icon: null,                          color: 'var(--color-text-muted)',    label: 'Queued' },
@@ -21,19 +21,19 @@ export default function FileRow({ file, status, result, onSelect, onRemove, isSe
       className="file-row"
       onClick={onSelect}
       style={{
-        borderColor: isSelected ? 'rgba(99,102,241,0.5)' : undefined,
-        background:  isSelected ? 'rgba(99,102,241,0.08)' : undefined,
+        borderColor: isSelected ? 'var(--color-accent)' : undefined,
+        background:  isSelected ? 'var(--color-accent-glow)' : undefined,
       }}
     >
       {/* Thumbnail */}
       <div style={{
         width: 44, height: 44, borderRadius: '8px', overflow: 'hidden', flexShrink: 0,
-        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--color-surface-subtle)', border: '1px solid var(--color-border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        {file.previewUrl
+        {file.previewUrl && isImage(file)
           ? <img src={file.previewUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <Image size={18} color="var(--color-text-subtle)" />
+          : <File size={18} color="var(--color-text-subtle)" />
         }
       </div>
 

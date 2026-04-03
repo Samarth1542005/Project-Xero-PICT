@@ -19,6 +19,13 @@ export function getFileExtension(filename) {
 }
 
 /**
+ * Check if file is an image
+ */
+export function isImage(file) {
+  return file.type.startsWith('image/');
+}
+
+/**
  * Validate if file is a supported image type
  */
 export function isValidImageType(file) {
