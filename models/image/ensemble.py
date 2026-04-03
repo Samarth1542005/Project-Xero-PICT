@@ -2,6 +2,7 @@ from PIL import Image
 import io
 import torch
 from facenet_pytorch import MTCNN
+
 from models.image.vit_detector import get_fake_prob as vit_fake_prob, load_vit
 from models.image.siglip_detector import get_fake_prob as siglip_fake_prob, load_siglip
 
@@ -47,14 +48,14 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
                         break
                 
                 # Take the highest fake probability of CONFIRMED faces
-                vit_fake = max(face_probs) if face_probs else vit_fake_prob(original_image)
+                vit_fake = max(face_probs) if face_probs else 0.50
             else:
-                vit_fake = vit_fake_prob(original_image)
+                vit_fake = 0.50 # Neutral: don't randomly run face models on empty scenes!
         except Exception as e:
             print(f"[ensemble] Face crop failed: {e}")
-            vit_fake = vit_fake_prob(original_image)
+            vit_fake = 0.50
     else:
-        vit_fake = vit_fake_prob(original_image)
+        vit_fake = 0.50
 
     # --- ROLE 2: SigLIP (Scene Detective) ---
     siglip_fake = siglip_fake_prob(original_image)
@@ -74,14 +75,14 @@ def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
     final_real_score = 1.0 - final_fake_score
     confidence = max(final_fake_score, final_real_score)
 
-    # Safe Boundaries
-    if final_fake_score >= 0.55:
+    # Safe Boundaries (Relaxed to avoid false positives on standard lighting)
+    if final_fake_score >= 0.60:
         label = "fake"
-    elif final_fake_score <= 0.45:
+    elif final_fake_score <= 0.40:
         label = "real"
     else:
         label = "uncertain"
-
+        
     return {
         "media_type": "image",
         "label":      label,
