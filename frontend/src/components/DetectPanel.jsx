@@ -10,20 +10,20 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 
 const VERDICT_ICON = {
-  real:       <CheckCircle2 size={22} />,
-  fake:       <XCircle      size={22} />,
+  real: <CheckCircle2 size={22} />,
+  fake: <XCircle size={22} />,
   suspicious: <AlertTriangle size={22} />,
 };
 
 const VERDICT_COLOR = {
-  real:       'var(--color-real)',
-  fake:       'var(--color-fake)',
+  real: 'var(--color-real)',
+  fake: 'var(--color-fake)',
   suspicious: 'var(--color-suspicious)',
 };
 
 const VERDICT_GLOW = {
-  real:       'var(--color-real-glow)',
-  fake:       'var(--color-fake-glow)',
+  real: 'var(--color-real-glow)',
+  fake: 'var(--color-fake-glow)',
   suspicious: 'var(--color-suspicious-glow)',
 };
 
@@ -63,12 +63,12 @@ function ScanAnimation({ active }) {
   return (
     <div className="scan-overlay">
       <div className="scan-line" />
-      {['top-left','top-right','bottom-left','bottom-right'].map((pos) => {
+      {['top-left', 'top-right', 'bottom-left', 'bottom-right'].map((pos) => {
         const s = {
-          'top-left':     { top: 12, left: 12,   borderRight: 'none', borderBottom: 'none' },
-          'top-right':    { top: 12, right: 12,   borderLeft:  'none', borderBottom: 'none' },
-          'bottom-left':  { bottom: 12, left: 12,  borderRight: 'none', borderTop: 'none' },
-          'bottom-right': { bottom: 12, right: 12, borderLeft:  'none', borderTop: 'none' },
+          'top-left': { top: 12, left: 12, borderRight: 'none', borderBottom: 'none' },
+          'top-right': { top: 12, right: 12, borderLeft: 'none', borderBottom: 'none' },
+          'bottom-left': { bottom: 12, left: 12, borderRight: 'none', borderTop: 'none' },
+          'bottom-right': { bottom: 12, right: 12, borderLeft: 'none', borderTop: 'none' },
         };
         return <div key={pos} style={{ position: 'absolute', width: 24, height: 24, border: '2px solid var(--color-cyan)', ...s[pos] }} />;
       })}
@@ -142,8 +142,8 @@ function GroqExplanation({ explanation, verdict, isLoading }) {
 
   // Typing animation effect for the explanation text
   const [displayed, setDisplayed] = useState('');
-  const [isTyping, setIsTyping]   = useState(false);
-  const prevExplanation           = useRef('');
+  const [isTyping, setIsTyping] = useState(false);
+  const prevExplanation = useRef('');
 
   React.useEffect(() => {
     if (!explanation || explanation === prevExplanation.current) return;
@@ -276,17 +276,17 @@ function GroqExplanation({ explanation, verdict, isLoading }) {
 
 /* ── Main DetectPanel ── */
 export default function DetectPanel() {
-  const [files,        setFiles]        = useState([]);
-  const [selectedIdx,  setSelectedIdx]  = useState(null);
-  const [dragging,     setDragging]     = useState(false);
-  const [showHeatmap,  setShowHeatmap]  = useState(true);
-  const [showExplain,  setShowExplain]  = useState(true);
+  const [files, setFiles] = useState([]);
+  const [selectedIdx, setSelectedIdx] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showExplain, setShowExplain] = useState(true);
   const [activeRegion, setActiveRegion] = useState(null);
   const fileInputRef = useRef(null);
 
-  const current     = selectedIdx !== null ? files[selectedIdx] : null;
+  const current = selectedIdx !== null ? files[selectedIdx] : null;
   const isAnalyzing = current?.status === 'analyzing';
-  const verdictMeta  = current?.result ? getVerdictMeta(current.result.verdict) : null;
+  const verdictMeta = current?.result ? getVerdictMeta(current.result.verdict) : null;
   const verdictColor = current?.result ? VERDICT_COLOR[current.result.verdict] : '#6366f1';
 
   const analyzeFile = useCallback(async (file, idx) => {
@@ -387,11 +387,25 @@ export default function DetectPanel() {
           {current && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'fadeInUp 0.5s ease' }}>
 
-              {/* Image preview */}
+              {/* Image / Video / Audio preview */}
               <div className="card" style={{ padding: '16px' }}>
                 <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#000', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {current.file.previewUrl && isImage(current.file) ? (
                     <img src={current.file.previewUrl} alt="Preview" style={{ width: '100%', height: 'auto', maxHeight: '320px', objectFit: 'contain', display: 'block', filter: isAnalyzing ? 'brightness(0.6)' : 'none', transition: 'filter 0.4s' }} />
+                  ) : current.file.previewUrl && current.file.type.startsWith('video/') ? (
+                    <video
+                      src={current.file.previewUrl}
+                      controls
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      style={{ width: '100%', height: 'auto', maxHeight: '320px', objectFit: 'contain', display: 'block', filter: isAnalyzing ? 'brightness(0.6)' : 'none', transition: 'filter 0.4s' }}
+                    />
+                  ) : current.file.previewUrl && current.file.type.startsWith('audio/') ? (
+                    <div style={{ width: '100%', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                      <audio src={current.file.previewUrl} controls style={{ width: '100%' }} />
+                    </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: 'var(--color-text-subtle)' }}>
                       <File size={64} style={{ opacity: 0.3 }} />
@@ -502,9 +516,9 @@ export default function DetectPanel() {
           <div style={{ textAlign: 'center', marginTop: '32px', animation: 'fadeIn 0.5s ease' }}>
             <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap' }}>
               {[
-                { icon: <Upload size={20} />,                                             label: 'Drag & drop files' },
-                { icon: <CheckCircle2 size={20} color="var(--color-real)" />,             label: 'Instant verdict' },
-                { icon: <Eye size={20} color="var(--color-cyan)" />,                      label: 'Visual heatmap' },
+                { icon: <Upload size={20} />, label: 'Drag & drop files' },
+                { icon: <CheckCircle2 size={20} color="var(--color-real)" />, label: 'Instant verdict' },
+                { icon: <Eye size={20} color="var(--color-cyan)" />, label: 'Visual heatmap' },
               ].map((hint) => (
                 <div key={hint.label} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.82rem', color: 'var(--color-text-subtle)' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>{hint.icon}</span> {hint.label}
