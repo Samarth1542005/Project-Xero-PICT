@@ -20,7 +20,7 @@ async def generate_explanation(media_type: str, ai_result: dict) -> str:
         completion = get_client().chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=180,
+            max_tokens=400,   # Increased from 180 to support 4-5 sentence detailed responses
             temperature=0.4,
         )
         return completion.choices[0].message.content.strip()

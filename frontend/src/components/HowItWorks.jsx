@@ -1,158 +1,136 @@
-// HowItWorks.jsx — Step-by-step pipeline explanation
+// HowItWorks.jsx — Clean pipeline steps
 import React from 'react';
-import { Upload, Cpu, ScanEye, BarChart2, ChevronRight } from 'lucide-react';
+import { Upload, Cpu, ScanEye, BarChart2, ArrowRight } from 'lucide-react';
 
 const STEPS = [
   {
-    step: '01',
-    icon: <Upload size={24} />,
+    num: '01',
+    icon: <Upload size={20} />,
     title: 'Media Ingestion',
-    desc: 'Upload multiple files of any format via drag-and-drop. We support image, video, and audio forensics.',
-    color: '#6366f1',
+    desc: 'Drag-and-drop one or more files. Supports images (JPEG, PNG, WebP) and video frames.',
   },
   {
-    step: '02',
-    icon: <Cpu size={24} />,
+    num: '02',
+    icon: <Cpu size={20} />,
     title: 'Neural Analysis',
-    desc: 'Our multi-modal model extracts facial landmarks, skin texture maps, frequency artifacts, and eye reflections.',
-    color: '#22d3ee',
+    desc: 'Six detection engines run in parallel — landmarks, skin texture, eye reflections, frequency artifacts.',
   },
   {
-    step: '03',
-    icon: <ScanEye size={24} />,
+    num: '03',
+    icon: <ScanEye size={20} />,
     title: 'Region Mapping',
-    desc: 'Suspicious areas are located and bounding boxes assigned with semantic labels for each anomaly type.',
-    color: '#a78bfa',
+    desc: 'Suspicious areas are localised. Bounding boxes with semantic labels mark each anomaly type.',
   },
   {
-    step: '04',
-    icon: <BarChart2 size={24} />,
+    num: '04',
+    icon: <BarChart2 size={20} />,
     title: 'Report & Score',
-    desc: 'A confidence score, verdict, and interactive visual explanation are returned instantly in the UI.',
-    color: '#f59e0b',
+    desc: 'A confidence score, verdict, and interactive visual explanation are returned in under two seconds.',
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section" style={{ position: 'relative', overflow: 'hidden' }}>
-      <div className="orb orb-cyan" style={{ width: 400, height: 400, bottom: -100, left: -100, position: 'absolute' }} />
+    <section id="how-it-works" className="section" style={{ borderTop: '1px solid var(--color-border)' }}>
+      <div className="container">
 
-      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-        <div className="section-header">
-          <div className="section-label"><ScanEye size={13} /> Pipeline</div>
-          <h2 className="section-title">How It Works</h2>
-          <p className="section-subtitle">
-            Four stages power every detection — from raw pixels to a fully explained verdict.
-          </p>
-        </div>
+        <div style={{ display: 'flex', gap: '64px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {/* Left — header */}
+          <div style={{ flex: '0 0 300px', minWidth: 0 }}>
+            <div className="section-label">Pipeline</div>
+            <h2 className="section-title">How DeepShield works</h2>
+            <p className="section-subtitle">
+              Four deterministic stages power every analysis — from raw pixels to a fully explained, auditable verdict.
+            </p>
+            <div style={{ marginTop: '32px' }}>
+              <a href="#detect" className="btn-primary" style={{ fontSize: '0.85rem', padding: '11px 22px' }}>
+                Try it now <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
 
-        <div style={{ display: 'flex', gap: '0', position: 'relative', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {STEPS.map((step, i) => (
-            <React.Fragment key={step.step}>
-              {/* Step card */}
+          {/* Right — steps */}
+          <div style={{ flex: '1 1 400px', minWidth: 0 }}>
+            {STEPS.map((step, i) => (
               <div
-                id={`step-${step.step}`}
+                key={step.num}
                 style={{
-                  flex: '1 1 220px',
-                  maxWidth: '260px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  padding: '32px 24px',
-                  borderRadius: 'var(--radius-lg)',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
+                  gap: '24px',
+                  paddingBottom: i < STEPS.length - 1 ? '0' : '0',
                   position: 'relative',
-                  transition: 'all 0.3s',
-                  animation: `fadeInUp 0.6s ${i * 0.12}s ease both`,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = step.color + '44';
-                  e.currentTarget.style.transform = 'translateY(-6px)';
-                  e.currentTarget.style.boxShadow = `0 24px 60px rgba(0,0,0,0.5), 0 0 40px ${step.color}20`;
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--color-border)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
+                  animation: `fadeInUp 0.5s ${i * 0.1}s ease both`,
                 }}
               >
-                {/* Step number */}
+                {/* Left gutter — number + line */}
                 <div style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  color: step.color,
-                  letterSpacing: '0.1em',
-                  opacity: 0.8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flexShrink: 0,
                 }}>
-                  {step.step}
+                  <div style={{
+                    width: 44, height: 44,
+                    borderRadius: '10px',
+                    background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--color-text-muted)',
+                    flexShrink: 0,
+                  }}>
+                    {step.icon}
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div style={{
+                      width: 1,
+                      flex: 1,
+                      minHeight: 32,
+                      background: 'var(--color-border)',
+                      margin: '8px 0',
+                    }} />
+                  )}
                 </div>
 
-                {/* Icon */}
-                <div style={{
-                  width: 52, height: 52,
-                  borderRadius: '14px',
-                  background: `${step.color}18`,
-                  border: `1px solid ${step.color}30`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: step.color,
-                  boxShadow: `0 0 20px ${step.color}25`,
-                }}>
-                  {step.icon}
-                </div>
-
-                {/* Text */}
-                <div>
+                {/* Content */}
+                <div style={{ paddingBottom: i < STEPS.length - 1 ? '32px' : '0' }}>
+                  <div style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.65rem',
+                    letterSpacing: '0.1em',
+                    color: 'var(--color-text-subtle)',
+                    textTransform: 'uppercase',
+                    marginBottom: '6px',
+                  }}>
+                    Step {step.num}
+                  </div>
                   <h3 style={{
                     fontFamily: 'var(--font-display)',
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
-                    marginBottom: '8px',
+                    fontSize: '1.0rem',
+                    fontWeight: 600,
                     color: 'var(--color-text)',
+                    marginBottom: '8px',
+                    letterSpacing: '-0.01em',
                   }}>
                     {step.title}
                   </h3>
                   <p style={{
-                    fontSize: '0.83rem',
+                    fontSize: '0.875rem',
                     color: 'var(--color-text-muted)',
-                    lineHeight: 1.65,
+                    lineHeight: 1.7,
                   }}>
                     {step.desc}
                   </p>
                 </div>
-
-                {/* Bottom accent bar */}
-                <div style={{
-                  position: 'absolute', bottom: 0, left: '24px', right: '24px',
-                  height: '2px', borderRadius: '99px',
-                  background: `linear-gradient(90deg, ${step.color}, transparent)`,
-                  opacity: 0.5,
-                }} />
               </div>
-
-              {/* Arrow connector */}
-              {i < STEPS.length - 1 && (
-                <div style={{
-                  display: 'flex', alignItems: 'center',
-                  color: 'var(--color-border-strong)',
-                  padding: '0 4px',
-                  alignSelf: 'center',
-                }}>
-                  <ChevronRight size={20} />
-                </div>
-              )}
-            </React.Fragment>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Bottom CTA */}
-        <div style={{ textAlign: 'center', marginTop: '56px' }}>
-          <a href="#detect" className="btn-primary">
-            Start Detecting <Upload size={16} />
-          </a>
-        </div>
+        <style>{`
+          @media (max-width: 768px) {
+            #how-it-works .container > div { flex-direction: column; gap: 40px; }
+          }
+        `}</style>
       </div>
     </section>
   );

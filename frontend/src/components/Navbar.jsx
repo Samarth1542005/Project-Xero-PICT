@@ -1,4 +1,4 @@
-// Navbar.jsx — Top navigation bar
+// Navbar.jsx — Professional minimal nav
 import React, { useState, useEffect } from 'react';
 import { Shield, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -18,51 +18,59 @@ export default function Navbar() {
     { label: 'Detect',       href: '#detect' },
     { label: 'How It Works', href: '#how-it-works' },
     { label: 'Modalities',   href: '#modalities' },
-    { label: 'Stats',        href: '#stats' },
+    { label: 'Benchmarks',   href: '#stats' },
   ];
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0,
-        zIndex: 1000,
-        transition: 'all 0.3s ease',
-        background: scrolled ? 'var(--color-bg)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent',
-        opacity: 0.95,
-      }}
-    >
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '68px' }}>
+    <nav style={{
+      position: 'fixed',
+      top: 0, left: 0, right: 0,
+      zIndex: 1000,
+      transition: 'all 0.3s ease',
+      background: scrolled ? 'var(--color-bg)' : 'transparent',
+      backdropFilter: scrolled ? 'blur(24px)' : 'none',
+      borderBottom: scrolled ? '1px solid var(--color-border)' : '1px solid transparent',
+    }}>
+      <div className="container" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        height: '64px',
+      }}>
 
         {/* Logo */}
         <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
-            width: 36, height: 36, borderRadius: '10px',
-            background: 'linear-gradient(135deg, #6366f1, #22d3ee)',
+            width: 32, height: 32, borderRadius: '8px',
+            background: 'var(--color-text)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 20px var(--color-accent-glow)',
           }}>
-            <Shield size={18} color="#fff" />
+            <Shield size={16} color="var(--color-bg)" strokeWidth={2.5} />
           </div>
           <span style={{
-            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.15rem',
-            background: 'linear-gradient(90deg, var(--color-text), var(--color-accent))',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 600,
+            fontSize: '1rem',
+            letterSpacing: '-0.01em',
+            color: 'var(--color-text)',
           }}>
             DeepShield
           </span>
         </a>
 
         {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} className="desktop-nav">
+        <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }} className="desktop-nav">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              style={{ padding: '6px 16px', borderRadius: '8px', fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
-              onMouseEnter={e => { e.target.style.color = 'var(--color-text)'; e.target.style.background = 'var(--color-border)'; }}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                color: 'var(--color-text-muted)',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.target.style.color = 'var(--color-text)'; e.target.style.background = 'var(--color-surface-subtle)'; }}
               onMouseLeave={e => { e.target.style.color = 'var(--color-text-muted)'; e.target.style.background = 'transparent'; }}
             >
               {link.label}
@@ -70,47 +78,89 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Theme Toggle + mobile btn */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        {/* Right controls */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Theme toggle */}
           <button
             onClick={toggle}
+            aria-label="Toggle theme"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              width: 40, height: 40, borderRadius: '10px',
+              width: 34, height: 34,
+              borderRadius: '8px',
               background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
+              color: 'var(--color-text-muted)',
               cursor: 'pointer',
-              transition: 'all 0.2s',
-              boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+              transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 15px var(--color-accent-glow)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)'; }}
-            aria-label="Toggle Theme"
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-text)'; e.currentTarget.style.borderColor = 'var(--color-border-strong)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.borderColor = 'var(--color-border)'; }}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
           </button>
 
+          {/* GitHub CTA */}
+          <a
+            href="https://github.com/Samarth1542005/Project-Xero-PICT"
+            target="_blank" rel="noopener noreferrer"
+            className="desktop-nav"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border-strong)',
+              color: 'var(--color-text)',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-surface-raised)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-surface)'; }}
+          >
+            GitHub
+          </a>
+
+          {/* Mobile menu btn */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ display: 'none', background: 'none', color: 'var(--color-text)', padding: '6px', border: 'none', cursor: 'pointer' }}
             className="mobile-menu-btn"
+            style={{
+              display: 'none',
+              background: 'none',
+              color: 'var(--color-text)',
+              padding: '6px',
+              border: 'none',
+              cursor: 'pointer',
+            }}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div style={{ background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '16px 24px 24px' }}>
+        <div style={{
+          background: 'var(--color-bg)',
+          borderTop: '1px solid var(--color-border)',
+          padding: '12px 24px 20px',
+        }}>
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              style={{ display: 'block', padding: '12px 0', borderBottom: '1px solid var(--color-border)', color: 'var(--color-text-muted)', fontSize: '0.95rem', fontWeight: 500 }}
+              style={{
+                display: 'block',
+                padding: '12px 0',
+                borderBottom: '1px solid var(--color-border-subtle)',
+                color: 'var(--color-text-muted)',
+                fontSize: '0.92rem',
+                fontWeight: 500,
+              }}
             >
               {link.label}
             </a>
@@ -127,4 +177,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
