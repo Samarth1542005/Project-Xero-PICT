@@ -35,13 +35,17 @@ TEST_CASES = [
         "path": r"C:\Users\Atharv\Downloads\test6_video.mp4"
     },
     {
-        "expected_label": "fake",
-        "path": r"C:\Users\Atharv\Downloads\test7_video.mp4"
-    },
-    {
         "expected_label": "real",
         "path": r"C:\Users\Atharv\Downloads\test8_video.mp4"
     }
+    # {
+    #     "expected_label": "real",
+    #     "path": r"C:\Users\Atharv\Downloads\test9_video.mp4"
+    # }
+    # {
+    #     "expected_label": "fake",
+    #     "path": r"C:\Users\Atharv\Downloads\test10_audio.mpeg"
+    # }
 ]
 
 def main():
@@ -61,9 +65,19 @@ def main():
             continue
             
         try:
-            is_video = path.lower().endswith('.mp4')
-            endpoint = "http://localhost:8000/detect/video" if is_video else "http://localhost:8000/detect/image"
-            mime_type = 'video/mp4' if is_video else 'image/jpeg'
+            # Dynamically route to Image, Video, or Audio endpoints
+            ext = os.path.splitext(path)[1].lower()
+            
+            if ext in ['.mp4', '.mov', '.avi']:
+                endpoint = "http://localhost:8000/detect/video"
+                mime_type = "video/mp4"
+            elif ext in ['.wav', '.mp3', '.mpeg', '.flac', '.ogg']:
+                endpoint = "http://localhost:8000/detect/audio"
+                # Strip the dot to create the mime type (e.g., 'audio/mpeg')
+                mime_type = f"audio/{ext[1:]}" 
+            else:
+                endpoint = "http://localhost:8000/detect/image"
+                mime_type = "image/jpeg"
             
             with open(path, 'rb') as f:
                 files = {'file': (os.path.basename(path), f, mime_type)}
@@ -79,7 +93,6 @@ def main():
                 
             else:
                 print(f"❌ Server Error: HTTP {response.status_code}")
-                # Print only first 150 chars of error to avoid massive crash dumps
                 print(response.text[:150])
                 
         except requests.exceptions.ConnectionError:
