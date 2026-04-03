@@ -143,7 +143,7 @@ async def detect_video(file: UploadFile = File(...)):
 
         frame_results = []
         for frame in frames:
-            r          = await loop.run_in_executor(None, classify_image, frame["image_bytes"])
+            r          = await loop.run_in_executor(None, classify_image, frame["image_bytes"], True)
             fake_score = r["ensemble_breakdown"]["final_fake_score"]
             frame_results.append({
                 "frame_index": frame["frame_index"],

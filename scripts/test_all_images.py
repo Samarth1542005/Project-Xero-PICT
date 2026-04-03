@@ -15,16 +15,32 @@ TEST_CASES = [
         "path": r"C:\Users\Atharv\Downloads\test2.jpg.jpeg"
     },
     {
-        "expected_label": "real/uncertain",
-        "path": r"C:\Users\Atharv\Downloads\WhatsApp Image 2026-03-18 at 11.26.31 AM.jpeg"
+        "expected_label": "real",
+        "path": r"C:\Users\Atharv\Downloads\Atharv.jpeg"
     },
     {
-        "expected_label": "real/uncertain",
-        "path": r"C:\Users\Atharv\.gemini\antigravity\brain\da3636f0-f656-4802-bc7f-680417503adf\media__1775210359713.jpg"
+        "expected_label": "real",
+        "path": r"C:\Users\Atharv\Downloads\samarth.jpeg"
     },
     {
-        "expected_label": "real/uncertain",
+        "expected_label": "real",
         "path": r"C:\Users\Atharv\Downloads\test5.jpg"
+    },
+    {
+        "expected_label": "fake",
+        "path": r"C:\Users\Atharv\Downloads\elon.jpg"
+    },
+    {
+        "expected_label": "fake",
+        "path": r"C:\Users\Atharv\Downloads\test6_video.mp4"
+    },
+    {
+        "expected_label": "fake",
+        "path": r"C:\Users\Atharv\Downloads\test7_video.mp4"
+    },
+    {
+        "expected_label": "real",
+        "path": r"C:\Users\Atharv\Downloads\test8_video.mp4"
     }
 ]
 
@@ -38,20 +54,20 @@ def main():
         expected = case["expected_label"].upper()
         
         print(f"Testing File: {os.path.basename(path)}")
-        print(f"Expected:     {expected}")
+        print(f"Expected O/P: [{expected}]")
         
         if not os.path.exists(path):
             print("❌ Error: File not found exactly at that path. Skipping...\n")
             continue
             
-        print("Sending request to backend...")
-        
         try:
-            start_time = time.time()
+            is_video = path.lower().endswith('.mp4')
+            endpoint = "http://localhost:8000/detect/video" if is_video else "http://localhost:8000/detect/image"
+            mime_type = 'video/mp4' if is_video else 'image/jpeg'
+            
             with open(path, 'rb') as f:
-                files = {'file': (os.path.basename(path), f, 'image/jpeg')}
-                response = requests.post(API_URL, files=files)
-            duration = time.time() - start_time
+                files = {'file': (os.path.basename(path), f, mime_type)}
+                response = requests.post(endpoint, files=files)
             
             if response.status_code == 200:
                 data = response.json()
@@ -59,13 +75,12 @@ def main():
                 label = verdict.get("label", "Unknown").upper()
                 confidence = verdict.get("percentage", "N/A")
                 
-                print(f"Result:       ✅ Success ({duration:.2f}s)")
-                print(f"AI Verdict:   [{label}] with {confidence} confidence.")
-                print(f"Explanation:  {data.get('explanation')}")
+                print(f"AI O/P:       [{label}] with {confidence} confidence.")
                 
             else:
                 print(f"❌ Server Error: HTTP {response.status_code}")
-                print(response.text)
+                # Print only first 150 chars of error to avoid massive crash dumps
+                print(response.text[:150])
                 
         except requests.exceptions.ConnectionError:
             print("❌ Connection Error: Is the FastAPI backend running on port 8000?")

@@ -23,37 +23,50 @@ def load_models():
     load_vit()
     load_siglip()
 
-def classify_image(image_bytes: bytes) -> dict:
+def classify_image(image_bytes: bytes, is_video_frame: bool = False) -> dict:
     original_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     focused_image = original_image
 
-    # --- THE MTCNN FACE CROPPER ---
+    # --- THE MTCNN FACE CROPPER & MULTI-FACE DETECTION ---
+    vit_fake = 0.0
     global mtcnn
+    
     if mtcnn is not None:
         try:
             boxes, _ = mtcnn.detect(original_image)
             if boxes is not None:
-                box = boxes[0].tolist()
-                focused_image = original_image.crop((box[0], box[1], box[2], box[3]))
+                face_probs = []
+                # Evaluate up to 3 faces to prevent multi-person deepfakes from hiding
+                for box in boxes[:3]:
+                    b = box.tolist()
+                    face_crop = original_image.crop((b[0], b[1], b[2], b[3]))
+                    face_probs.append(vit_fake_prob(face_crop))
+                # Take the highest fake probability found among the faces
+                vit_fake = max(face_probs) if face_probs else vit_fake_prob(original_image)
+            else:
+                vit_fake = vit_fake_prob(original_image)
         except Exception as e:
             print(f"[ensemble] Face crop failed: {e}")
-
-    # --- ROLE 1: ViT (Face Detective) ---
-    vit_fake = vit_fake_prob(focused_image)
+            vit_fake = vit_fake_prob(original_image)
+    else:
+        vit_fake = vit_fake_prob(original_image)
 
     # --- ROLE 2: SigLIP (Scene Detective) ---
     siglip_fake = siglip_fake_prob(original_image)
 
-    # --- SMART OVERRIDE LOGIC WITH BOOSTING ---
-    # If ViT catches a face-swap, we multiply the score by 1.5 to boost system confidence!
-    if vit_fake >= 0.50:
-        final_fake_score = min(0.98, vit_fake * 1.5)
-    # If SigLIP catches a Diffusion background, we use the high score directly
-    elif siglip_fake >= 0.80:
-        final_fake_score = siglip_fake
-    # For borderline / real images, we use a balanced 50/50 average
+    # --- VIDEO VS IMAGE ROUTING LOGIC ---
+    if is_video_frame:
+        # Video compression ruins SigLIP out-of-the-box, and video fakes are mostly Face-Swaps.
+        # We rely 100% on the Face Detective without the aggressive 1.5x static image booster.
+        final_fake_score = vit_fake
     else:
-        final_fake_score = (VIT_WEIGHT * vit_fake) + (SIGLIP_WEIGHT * siglip_fake)
+        # --- SMART OVERRIDE LOGIC ---
+        if vit_fake >= 0.50:
+            final_fake_score = vit_fake
+        elif siglip_fake >= 0.80:
+            final_fake_score = siglip_fake
+        else:
+            final_fake_score = (VIT_WEIGHT * vit_fake) + (SIGLIP_WEIGHT * siglip_fake)
 
     final_real_score = 1.0 - final_fake_score
     confidence = max(final_fake_score, final_real_score)
